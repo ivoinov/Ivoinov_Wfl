@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Ivoinov_Wfl>
+            <version>0.1.0</version>
+        </Ivoinov_Wfl>
+    </modules>
+    <global>
+        <models>
+            <ivoinov_wfl>
+                <class>Ivoinov_Wfl_Model</class>
+                <resourceModel>ivoinov_wfl_resource</resourceModel>
+            </ivoinov_wfl>
+            <ivoinov_wfl_resource>
+                <class>Ivoinov_Wfl_Model_Resource</class>
+            </ivoinov_wfl_resource>
+        </models>
+        <helpers>
+            <ivoinov_wfl>
+                <class>Ivoinov_Wfl_Helper</class>
+            </ivoinov_wfl>
+        </helpers>
+        <resources>
+            <ivoinov_wfl_setup>
+                <setup>
+                    <module>Ivoinov_Wfl</module>
+                    <class>Mage_Sales_Model_Resource_Setup</class>
+                </setup>
+            </ivoinov_wfl_setup>
+        </resources>
+    </global>
+    <crontab>
+        <jobs>
+            <wfl_order_export>
+                <schedule>
+                    <cron_expr>*/30 * * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>ivoinov_wfl/observer::exportOrders</model>
+                </run>
+            </wfl_order_export>
+        </jobs>
+    </crontab>
+</config>

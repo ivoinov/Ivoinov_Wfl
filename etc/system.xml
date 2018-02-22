@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<config>
+    <sections>
+        <ivoinov_wfl translate="label" module="ivoinov_wfl">
+            <label>Williams fashion logistics</label>
+            <tab>sales</tab>
+            <sort_order>1000</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>1</show_in_website>
+            <show_in_store>1</show_in_store>
+            <groups>
+                <ftp translate="label" module="ivoinov_wfl">
+                    <label>FTP settings</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>1000</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enabled translate="label" module="ivoinov_wfl">
+                            <label>Enable</label>
+                            <comment>Enable ftp download</comment>
+                            <frontend_type>select</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                        </enabled>
+                        <host translate="label" module="ivoinov_wfl">
+                            <label>Host</label>
+                            <comment>ftp host or ip address</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </host>
+                        <port translate="label" module="ivoinov_wfl">
+                            <label>Post</label>
+                            <comment>default port 21</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </port>
+                        <username translate="label" module="ivoinov_wfl">
+                            <label>Username</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </username>
+                        <password translate="label" module="ivoinov_wfl">
+                            <label>Password</label>
+                            <frontend_type>password</frontend_type>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </password>
+                    </fields>
+                </ftp>
+            </groups>
+        </ivoinov_wfl>
+    </sections>
+</config>
