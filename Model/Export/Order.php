@@ -176,6 +176,6 @@ class Ivoinov_Wfl_Model_Export_Order extends Ivoinov_Wfl_Model_Export
             mkdir($filepath, 07777, true);
         }
         $document->save($filepath . DS . $filename);
-        $this->_sftpHelper->sendFileToFtp($filepath . DS . $filename, self::PATH_TO_FILE_ON_FTP . $filename);
+        $this->_sftpHelper->sendFileToFtp($document->saveXML(), self::PATH_TO_FILE_ON_FTP . $filename);
     }
 }

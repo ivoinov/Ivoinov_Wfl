@@ -54,7 +54,7 @@ class Ivoinov_Wfl_Helper_Sftp extends Ivoinov_Wfl_Helper_Ftp
      */
     public function sendFileToFtp($localFilepath, $remoteFilepath)
     {
-        $this->_client->write($remoteFilepath, $localFilepath);
+        $this->_client->write($remoteFilepath, $localFilepath, NET_SFTP_LOCAL_FILE);
     }
 
     /**
