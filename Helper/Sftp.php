@@ -44,11 +44,27 @@ class Ivoinov_Wfl_Helper_Sftp extends Ivoinov_Wfl_Helper_Ftp
         return $this;
     }
 
+    /**
+     * Send file to ftp.
+     *
+     * @param string $localFilepath
+     * @param static $remoteFilepath
+     *
+     * @return bool|void
+     */
     public function sendFileToFtp($localFilepath, $remoteFilepath)
     {
         $this->_client->write($remoteFilepath, $localFilepath);
     }
 
+    /**
+     * Load files from ftp to local folder.
+     *
+     * @param string $remoteDirPath
+     * @param string $localFolder
+     *
+     * @return array|bool
+     */
     public function loadFilesFromFtp($remoteDirPath, $localFolder)
     {
         $this->_client->cd($remoteDirPath);

@@ -69,6 +69,14 @@ class Ivoinov_Wfl_Helper_Ftp extends Mage_Core_Helper_Abstract
 
     }
 
+    /**
+     * Load files from ftp.
+     *
+     * @param string $remoteDirPath
+     * @param string $localFolder
+     *
+     * @return bool
+     */
     public function loadFilesFromFtp($remoteDirPath, $localFolder)
     {
         try {

@@ -15,6 +15,9 @@
  * @license    http://www.php.net/license/3_01.txt  PHP License 3.01
  */
 
+/**
+ * Class Ivoinov_Wfl_Model_Export_BillingInfo
+ */
 class Ivoinov_Wfl_Model_Export_BillingInfo extends Ivoinov_Wfl_Model_Export_Abstract
 {
     /**

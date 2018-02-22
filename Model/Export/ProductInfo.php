@@ -15,6 +15,9 @@
  * @license    http://www.php.net/license/3_01.txt  PHP License 3.01
  */
 
+/**
+ * Class Ivoinov_Wfl_Model_Export_ProductInfo
+ */
 class Ivoinov_Wfl_Model_Export_ProductInfo extends Ivoinov_Wfl_Model_Export_Abstract
 {
     CONST WEIGHT_DEFAULT_VALUE = 1;
@@ -22,7 +25,9 @@ class Ivoinov_Wfl_Model_Export_ProductInfo extends Ivoinov_Wfl_Model_Export_Abst
      * @var Mage_Sales_Model_Order_Item
      */
     protected $_orderItem;
-
+    /**
+     * @var array
+     */
     protected $_sizeAttributeCodes
         = array(
             'size',
@@ -31,6 +36,9 @@ class Ivoinov_Wfl_Model_Export_ProductInfo extends Ivoinov_Wfl_Model_Export_Abst
             'accessories_size',
             'cpsizechart',
         );
+    /**
+     * @var array
+     */
     protected $_styleAttributeCodes
         = array(
             'style',
@@ -39,6 +47,9 @@ class Ivoinov_Wfl_Model_Export_ProductInfo extends Ivoinov_Wfl_Model_Export_Abst
             'luggage_travel_style',
             'luggage_style',
         );
+    /**
+     * @var array
+     */
     protected $_colorAttributeCodes
         = array(
             'color',
@@ -96,6 +107,11 @@ class Ivoinov_Wfl_Model_Export_ProductInfo extends Ivoinov_Wfl_Model_Export_Abst
         $this->_orderItem = $orderItem;
     }
 
+    /**
+     * @param Mage_Catalog_Model_Product $product
+     *
+     * @return string
+     */
     protected function _getWeight(Mage_Catalog_Model_Product $product)
     {
         $productWeight = $product->getWeight();
@@ -116,6 +132,11 @@ class Ivoinov_Wfl_Model_Export_ProductInfo extends Ivoinov_Wfl_Model_Export_Abst
         return number_format($productWeight, 4);
     }
 
+    /**
+     * @param Mage_Catalog_Model_Product $product
+     *
+     * @return null|string
+     */
     protected function _getSize(Mage_Catalog_Model_Product $product)
     {
         foreach ($this->_sizeAttributeCodes as $sizeAttributeCode) {
@@ -128,6 +149,11 @@ class Ivoinov_Wfl_Model_Export_ProductInfo extends Ivoinov_Wfl_Model_Export_Abst
         return null;
     }
 
+    /**
+     * @param Mage_Catalog_Model_Product $product
+     *
+     * @return null|string
+     */
     protected function _getStyle(Mage_Catalog_Model_Product $product)
     {
         foreach ($this->_styleAttributeCodes as $styleAttributeCode) {
@@ -141,6 +167,11 @@ class Ivoinov_Wfl_Model_Export_ProductInfo extends Ivoinov_Wfl_Model_Export_Abst
 
     }
 
+    /**
+     * @param Mage_Catalog_Model_Product $product
+     *
+     * @return null|string
+     */
     protected function _getColor(Mage_Catalog_Model_Product $product)
     {
         foreach ($this->_colorAttributeCodes as $colorAttributeCode) {
