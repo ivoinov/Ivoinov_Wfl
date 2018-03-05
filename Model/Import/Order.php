@@ -27,11 +27,12 @@ class Ivoinov_Wfl_Model_Import_Order extends Ivoinov_Wfl_Model_Import
     CONST PATH_TO_FILES_ON_FTP                   = '/Status_Update/New';
     CONST ORDER_FILES_MASK                       = 'OSL_*.xml';
     CONST TRACK_CARRIER_CODE                     = 'custom';
-    CONST DELIVERY_ORDER_STATUS_PICKED_UP_FULL   = 1302;
-    CONST DELIVERY_ORDER_STATUS_PICKED_PARTIALLY = 1301;
+    CONST DELIVERY_ORDER_STATUS_PICKED_UP_FULL   = '1302';
+    CONST DELIVERY_ORDER_STATUS_PICKED_PARTIALLY = '1301';
 
     protected $_ordersXPATH = 'ConfirmationBody/Orders';
     protected $_orderIncrementIdXPATH = 'Order/OrderNumber';
+    protected $_iconicOrderIncrementIdXPATH = 'Order/CustomerOrder';
     protected $_orderStatusXPATH = 'Order/Status';
     protected $_orderTrackingNumberXPATH = 'Order/ConNote';
     protected $_orderItemsXPATH = 'Order/items';
@@ -59,18 +60,37 @@ class Ivoinov_Wfl_Model_Import_Order extends Ivoinov_Wfl_Model_Import
                     foreach ($orders as $order) {
                         $incrementId = $order->xpath($this->_orderIncrementIdXPATH);
                         if ($incrementId === false || !count($incrementId) || !is_array($incrementId)) {
-                            throw new Exception($this->_helper->__('%s increment id node is missing'));
+                            $incrementId = $order->xpath($this->_iconicOrderIncrementIdXPATH);
+                            if ($incrementId === false || !count($incrementId) || !is_array($incrementId)) {
+                                throw new Exception($this->_helper->__('%s increment id node is missing'));
+                            }
                         }
                         $orderModel = Mage::getModel('sales/order')->loadByIncrementId((string)$incrementId[0]);
                         if (!$orderModel || !$orderModel->getId()) {
                             throw new Exception($this->_helper->__('Order was not found in magento. Order increment id - %s',
                                 $incrementId));
                         }
-                        $this->_createShipping($orderModel, $order);
-                        $this->_setOrderToComplete($orderModel);
+                        $statuses = $order->xpath($this->_orderStatusXPATH);
+                        if ($statuses === false || !count($statuses) || !is_array($statuses)) {
+                            // Continue as status node is missing
+                            $this->_moveFileToArchive($file);
+                            continue;
+                        }
+                        if ((string)$statuses[0] == self::DELIVERY_ORDER_STATUS_PICKED_PARTIALLY
+                            || (string)$statuses[0] == self::DELIVERY_ORDER_STATUS_PICKED_UP_FULL) {
+                            $this->_createShipping($orderModel, $order);
+                            $this->_setOrderToComplete($orderModel);
+                            $this->_moveFileToArchive($file);
+                        } else {
+                            // Continue as status node is missing
+                            $this->_moveFileToArchive($file);
+                            continue;
+                        }
                     }
                 } catch (Exception $e) {
                     Mage::logException($e);
+                    echo $file . "\n";
+                    echo $e->getMessage() . "\n";
                     continue;
                 }
             }
@@ -90,6 +110,9 @@ class Ivoinov_Wfl_Model_Import_Order extends Ivoinov_Wfl_Model_Import
             throw new Exception($this->_helper->__('%s filepath doesn\'t exist or not readable', $filepath));
         }
         $files = $this->_sftpHelper->loadFilesFromFtp(self::PATH_TO_FILES_ON_FTP, $filepath);
+        if (empty($files)) {
+            return glob(rtrim($filepath, DS) . DS . '*.*');
+        }
 
         return $files;
     }
@@ -103,7 +126,7 @@ class Ivoinov_Wfl_Model_Import_Order extends Ivoinov_Wfl_Model_Import
     protected function _createShipping(Mage_Sales_Model_Order $order, SimpleXMLElement $xmlOrderNode)
     {
         if (!$order->canShip()) {
-            throw new Exception($this->_helper->__('Order %s can\'t be shipped'));
+            throw new Exception($this->_helper->__('Order %s can\'t be shipped', $order->getIncrementId()));
         }
         /** @var Mage_Sales_Model_Service_Order $serviceModel */
         $serviceModel = Mage::getModel('sales/service_order', $order);
@@ -118,7 +141,11 @@ class Ivoinov_Wfl_Model_Import_Order extends Ivoinov_Wfl_Model_Import
         foreach ($itemsNode as $itemXmlNode) {
             /** @var Mage_Sales_Model_Order_Item $orderItem */
             $orderItem = $this->_getOrderItem($order, $itemXmlNode);
-            $itemsQty[$orderItem->getId()] = $orderItem->getQtyToShip();
+            if ($orderItem->getParentItemId()) {
+                $itemsQty[$orderItem->getParentItem()->getId()] = $orderItem->getParentItem()->getQtyToShip();
+            } else {
+                $itemsQty[$orderItem->getId()] = $orderItem->getQtyToShip();
+            }
         }
         if ($itemsQty === array()) {
             throw new Exception($this->_helper->__('No items to ship. Please, check xml file. Order increment id - %s',
@@ -126,9 +153,10 @@ class Ivoinov_Wfl_Model_Import_Order extends Ivoinov_Wfl_Model_Import
         }
         /** @var Mage_Sales_Model_Order_Shipment $shipment */
         $shipment = $serviceModel->prepareShipment($itemsQty);
+        $shipment->register();
         $trackingNumberArray = $xmlOrderNode->xpath($this->_orderTrackingNumberXPATH);
         if ($trackingNumberArray !== false && count($trackingNumberArray)) {
-            $track = $this->_createTrack((string)$trackingNumberArray[0], $order->getShippingDescription());
+            $track = $this->_createTrack((string)$trackingNumberArray[0], $order);
             $shipment->addTrack($track);
         }
         $shipment->save();
@@ -162,7 +190,6 @@ class Ivoinov_Wfl_Model_Import_Order extends Ivoinov_Wfl_Model_Import
                 return $orderItem;
             }
         }
-
         throw new Exception($this->_helper->__('Can\'t find order item in order %s. SKU - %s , barcode - %s',
             $order->getIncrementId(), $productSku, $productBarcode));
     }
@@ -215,24 +242,68 @@ class Ivoinov_Wfl_Model_Import_Order extends Ivoinov_Wfl_Model_Import
      */
     protected function _setOrderToComplete(Mage_Sales_Model_Order $order)
     {
-        $order->setState(Mage_Sales_Model_Order::STATE_COMPLETE);
+        $order->setData('state', Mage_Sales_Model_Order::STATE_COMPLETE);
+        $order->setData('status', Mage_Sales_Model_Order::STATE_COMPLETE);
         $order->save();
     }
 
     /**
-     * @param string $trackingNumber
-     * @param string $shippingTitle
+     * @param string                 $trackingNumber
+     * @param Mage_Sales_Model_Order $order
      *
      * @return Mage_Sales_Model_Order_Shipment_Track
      */
-    protected function _createTrack($trackingNumber, $shippingTitle)
+    protected function _createTrack($trackingNumber, Mage_Sales_Model_Order $order)
     {
         /** @var Mage_Sales_Model_Order_Shipment_Track $track */
         $track = Mage::getModel('sales/order_shipment_track');
         $track->setNumber($trackingNumber);
         $track->setCarrierCode(self::TRACK_CARRIER_CODE);
-        $track->setTitle($shippingTitle);
+        $track->setTitle($this->_getShippingTitle($order));
 
         return $track;
+    }
+
+    /**
+     * Return magento DB connection.
+     *
+     * @return Varien_Db_Adapter_Interface
+     */
+    protected function _getDBConnection()
+    {
+        return Mage::getSingleton('core/resource')->getConnection('core_write');
+    }
+
+    protected function _moveFileToArchive($filePath)
+    {
+        $fileName = basename($filePath);
+        $newFilePath = implode(DS, array(
+            rtrim(str_replace($fileName, '', $filePath), DS),
+            'archive',
+            $fileName,
+        ));
+        mkdir(dirname($newFilePath), 0777, true);
+        rename($filePath, $newFilePath);
+    }
+
+    /**
+     * Return shipping method title depends on country
+     *
+     *
+     * @param Mage_Sales_Model_Order $order
+     *
+     * @return string
+     */
+    protected function _getShippingTitle(Mage_Sales_Model_Order $order)
+    {
+        $shippingAddress = $order->getShippingAddress();
+        if ($shippingAddress->getCountryId() == 'au') {
+            return 'Aus Post';
+        }
+        if ($shippingAddress->getCountryId() == 'nz') {
+            return 'DHL Ecommerce';
+        }
+
+        return $order->getShippingDescription();
     }
 }
