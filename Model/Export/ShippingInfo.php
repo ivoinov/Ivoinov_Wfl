@@ -20,6 +20,12 @@
  */
 class Ivoinov_Wfl_Model_Export_ShippingInfo extends Ivoinov_Wfl_Model_Export_Abstract
 {
+    CONST SHIPPING_ADDRESS_STREET_MAX_LENGTH = 30;
+    /**
+     * @var array
+     */
+    protected $_preparedXmlData = array();
+
     /**
      * @var array
      */
@@ -29,10 +35,6 @@ class Ivoinov_Wfl_Model_Export_ShippingInfo extends Ivoinov_Wfl_Model_Export_Abs
             'd_email'        => 'email',
             'd_telephone'    => 'telephone',
             'd_mobile'       => 'telephone',
-            'd_padd1'        => 'street1',
-            'd_padd2'        => 'street2',
-            'd_padd3'        => 'street3',
-            'd_padd4'        => 'street4',
             'd_psuburb'      => 'city',
             'd_ppostcode'    => 'postcode',
             'd_pstate'       => 'region',
@@ -42,28 +44,69 @@ class Ivoinov_Wfl_Model_Export_ShippingInfo extends Ivoinov_Wfl_Model_Export_Abs
     /**
      * Process shipping information.
      *
-     * return void
+     * @return void
      */
     public function process()
     {
+
         if ($this->_order->getId()) {
-            /** @var Mage_Sales_Model_Order_Address $shippingAddress */
-            $shippingAddress = $this->_order->getShippingAddress();
-            foreach ($this->_shippingAddressMapping as $xmlNodeName => $shippingAddressFieldName) {
-                $xmlNodeValue = $shippingAddress->getData($shippingAddressFieldName);
-                if ($shippingAddressFieldName == 'email' && empty($xmlNodeValue)) {
-                    $xmlNodeValue = $this->_order->getCustomerEmail();
-                }
-                if (empty($xmlNodeValue)) {
-                    $methodName = 'get';
-                    $methodName .= str_replace('_', '', uc_words(str_replace('_', ' ', $shippingAddressFieldName)));
-                    $xmlNodeValue = $shippingAddress->$methodName();
-                    if (empty($xmlNodeValue)) {
-                        $xmlNodeValue = $this->_order->$methodName();
-                    }
-                }
+            $this->_collectInformation();
+            foreach ($this->_preparedXmlData as $xmlNodeName => $xmlNodeValue) {
                 $this->_xmlNode->appendChild($this->_xmlDocument->createElement($xmlNodeName, $xmlNodeValue));
             }
+        }
+    }
+
+    /**
+     * Collect information for adding to XML.
+     *
+     * @return void
+     */
+    protected function _collectInformation()
+    {
+        /** @var Mage_Sales_Model_Order_Address $shippingAddress */
+        $shippingAddress = $this->_order->getShippingAddress();
+        foreach ($this->_shippingAddressMapping as $xmlNodeName => $shippingAddressFieldName) {
+            $xmlNodeValue = $shippingAddress->getData($shippingAddressFieldName);
+            if ($shippingAddressFieldName == 'email' && empty($xmlNodeValue)) {
+                $xmlNodeValue = $this->_order->getCustomerEmail();
+            }
+            if (empty($xmlNodeValue)) {
+                $methodName = 'get';
+                $methodName .= str_replace('_', '', uc_words(str_replace('_', ' ', $shippingAddressFieldName)));
+                $xmlNodeValue = $shippingAddress->$methodName();
+                if (empty($xmlNodeValue)) {
+                    $xmlNodeValue = $this->_order->$methodName();
+                }
+            }
+            $this->_preparedXmlData[$xmlNodeName] = $xmlNodeValue;
+        }
+        $this->_processAddress();
+    }
+
+    /**
+     * Separate processing for shipping address
+     *
+     * @return void
+     */
+    protected function _processAddress()
+    {
+        $shippingAddressStreet = $this->_order->getShippingAddress()->getStreet(-1);
+        if (strlen($shippingAddressStreet) >= self::SHIPPING_ADDRESS_STREET_MAX_LENGTH) {
+            $streetParts = explode(' ', $shippingAddressStreet);
+            for ($i = 1; $i <= 4; $i++) {
+                $xmlAddressField = 'd_padd' . $i;
+                $xmlAddressFieldValue = '';
+                foreach ($streetParts as $streetPartId => $streetPart) {
+                    if (strlen($xmlAddressFieldValue .' '. $streetPart) <= self::SHIPPING_ADDRESS_STREET_MAX_LENGTH) {
+                        $xmlAddressFieldValue .= ' '. $streetPart;
+                        unset($streetParts[$streetPartId]);
+                    }
+                }
+                $this->_preparedXmlData[$xmlAddressField] = $xmlAddressFieldValue;
+            }
+        } else {
+            $this->_preparedXmlData['d_padd1'] = $this->_order->getShippingAddress()->getStreet();
         }
     }
 }

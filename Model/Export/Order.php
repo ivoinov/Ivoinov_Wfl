@@ -81,6 +81,8 @@ class Ivoinov_Wfl_Model_Export_Order extends Ivoinov_Wfl_Model_Export
      * @param DOMNode                $headerNode
      * @param DOMDocument            $document
      * @param Mage_Sales_Model_Order $order
+     *
+     * @return void
      */
     protected function _addShippingInfo(
         DOMNode $headerNode,
@@ -97,6 +99,8 @@ class Ivoinov_Wfl_Model_Export_Order extends Ivoinov_Wfl_Model_Export
      * @param DOMNode                $headerNode
      * @param DOMDocument            $document
      * @param Mage_Sales_Model_Order $order
+     *
+     * @return void
      */
     protected function _addBillingInfo(
         DOMNode $headerNode,
@@ -113,6 +117,8 @@ class Ivoinov_Wfl_Model_Export_Order extends Ivoinov_Wfl_Model_Export
      * @param DOMNode                $headerNode
      * @param DOMDocument            $document
      * @param Mage_Sales_Model_Order $order
+     *
+     * @return void
      */
     protected function _addDeliveryInfo(
         DOMNode $headerNode,
@@ -123,7 +129,6 @@ class Ivoinov_Wfl_Model_Export_Order extends Ivoinov_Wfl_Model_Export
         $deliveryInfo = Mage::getModel('ivoinov_wfl/export_deliveryInfo',
             array('order' => $order, 'document' => $document, 'node' => $headerNode));
         $deliveryInfo->process();
-
     }
 
     /**
@@ -131,6 +136,8 @@ class Ivoinov_Wfl_Model_Export_Order extends Ivoinov_Wfl_Model_Export
      * @param DOMDocument                 $document
      * @param Mage_Sales_Model_Order      $order
      * @param Mage_Sales_Model_Order_Item $orderItem
+     *
+     * @return void
      */
     protected function _addProductInfo(
         DOMNode $productsNode,
@@ -143,13 +150,14 @@ class Ivoinov_Wfl_Model_Export_Order extends Ivoinov_Wfl_Model_Export
             array('order' => $order, 'document' => $document, 'node' => $productsNode));
         $productInfo->setOrderItem($orderItem);
         $productInfo->process();
-
     }
 
     /**
      * @param DOMNode                $orderNode
      * @param DOMDocument            $document
      * @param Mage_Sales_Model_Order $order
+     *
+     * @return void
      */
     protected function _addPaymentInfo(
         DOMNode $orderNode,
@@ -160,12 +168,13 @@ class Ivoinov_Wfl_Model_Export_Order extends Ivoinov_Wfl_Model_Export
         $paymentInfo = Mage::getModel('ivoinov_wfl/export_paymentInfo',
             array('order' => $order, 'document' => $document, 'node' => $orderNode));
         $paymentInfo->process();
-
     }
 
     /**
      * @param DOMDocument            $document
      * @param Mage_Sales_Model_Order $order
+     *
+     * @return void
      */
     protected function _downloadFileToFTP(DOMDocument $document, Mage_Sales_Model_Order $order)
     {
@@ -180,6 +189,13 @@ class Ivoinov_Wfl_Model_Export_Order extends Ivoinov_Wfl_Model_Export
         $this->_moveFileToArchive($filepath . DS . $filename);
     }
 
+    /**
+     * Move file to archive.
+     *
+     * @param string $filePath
+     *
+     * @return void
+     */
     protected function _moveFileToArchive($filePath)
     {
         $fileName = basename($filePath);
@@ -190,6 +206,5 @@ class Ivoinov_Wfl_Model_Export_Order extends Ivoinov_Wfl_Model_Export
         ));
         mkdir(dirname($newFilePath), 0777, true);
         rename($filePath, $newFilePath);
-
     }
 }
