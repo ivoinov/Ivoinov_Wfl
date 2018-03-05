@@ -177,5 +177,19 @@ class Ivoinov_Wfl_Model_Export_Order extends Ivoinov_Wfl_Model_Export
         }
         $document->save($filepath . DS . $filename);
         $this->_sftpHelper->sendFileToFtp($document->saveXML(), self::PATH_TO_FILE_ON_FTP . $filename);
+        $this->_moveFileToArchive($filepath . DS . $filename);
+    }
+
+    protected function _moveFileToArchive($filePath)
+    {
+        $fileName = basename($filePath);
+        $newFilePath = implode(DS, array(
+            rtrim(str_replace($fileName, '', $filePath), DS),
+            'archive',
+            $fileName,
+        ));
+        mkdir(dirname($newFilePath), 0777, true);
+        rename($filePath, $newFilePath);
+
     }
 }

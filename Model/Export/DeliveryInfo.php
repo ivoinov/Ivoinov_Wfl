@@ -22,7 +22,7 @@ class Ivoinov_Wfl_Model_Export_DeliveryInfo extends Ivoinov_Wfl_Model_Export_Abs
 {
     CONST DELIVERY_BRANCH_NUMBER     = '0001';
     CONST DELIVERY_PRIORITY          = 'standard';
-    CONST DELIVERY_COMPANY_ID        = 'AS00';
+    CONST DELIVERY_COMPANY_ID        = 'ASN0';
     CONST ICONIC_DELIVERY_COMPANY_ID = 'ASI0';
     CONST DELIVERY_DIVISION          = 'AS';
     CONST DELIVERY_CHANEL            = 'Online';
@@ -77,9 +77,11 @@ class Ivoinov_Wfl_Model_Export_DeliveryInfo extends Ivoinov_Wfl_Model_Export_Abs
      */
     protected function _getShippingCarrierCode()
     {
-        if ($this->_order->getShippingAddress()->getCountryId() == 'NZ'
-            || $this->_order->getShippingAddress()->getCountryId() == 'AU') {
-            return 'APTSTD';
+        if ($this->_order->getStore()->getCode() == 'ic') {
+            return 'APSEXP';
+        } elseif ($this->_order->getShippingAddress()->getCountryId() == 'nz'
+            || $this->_order->getShippingAddress()->getCountryId() == 'au') {
+            return 'APSSTD';
         } else {
             return 'DHLGML';
         }
