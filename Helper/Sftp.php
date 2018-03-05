@@ -77,8 +77,11 @@ class Ivoinov_Wfl_Helper_Sftp extends Ivoinov_Wfl_Helper_Ftp
                 continue;
             }
             $this->_client->read($remoteFilePath['text'], rtrim($localFolder, DS) . DS . $remoteFilePath['text']);
-
-            return glob(rtrim($localFolder, DS) . DS . '*.*');
+            if (file_exists(rtrim($localFolder, DS) . DS . $remoteFilePath['text'])) {
+                $this->_client->mv($remoteFilePath['id'],
+                    str_replace('/Status_Update/New', '/Status_Update/Archive', $remoteFilePath['id']));
+            }
         }
+        return glob(rtrim($localFolder, DS) . DS . '*.*');
     }
 }
