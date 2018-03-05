@@ -39,6 +39,15 @@
                     <model>ivoinov_wfl/observer::exportOrders</model>
                 </run>
             </wfl_order_export>
+
+            <wfl_order_import>
+                <schedule>
+                    <cron_expr>*/30 * * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>ivoinov_wfl/observer::importOrdersStatus</model>
+                </run>
+            </wfl_order_import>
         </jobs>
     </crontab>
 </config>
