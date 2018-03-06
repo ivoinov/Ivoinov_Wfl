@@ -106,7 +106,7 @@ class Ivoinov_Wfl_Model_Export_ShippingInfo extends Ivoinov_Wfl_Model_Export_Abs
                 $this->_preparedXmlData[$xmlAddressField] = $xmlAddressFieldValue;
             }
         } else {
-            $this->_preparedXmlData['d_padd1'] = $this->_order->getShippingAddress()->getStreet();
+            $this->_preparedXmlData['d_padd1'] = $this->_order->getShippingAddress()->getStreet(-1);
         }
     }
 }
