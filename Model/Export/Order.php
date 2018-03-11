@@ -73,6 +73,7 @@ class Ivoinov_Wfl_Model_Export_Order extends Ivoinov_Wfl_Model_Export
     protected function _getOrderCollectionForExport()
     {
         return Mage::getResourceModel('sales/order_collection')
+            ->addFieldToFilter('processing', 'status')
             ->addFieldToFilter(Ivoinov_Wfl_Helper_Data::ORDER_ATTRIBUTE_CODE_IS_SEND_TO_WFL,
                 array(array('eq' => 0), array('null' => true)));
     }
