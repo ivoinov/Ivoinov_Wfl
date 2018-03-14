@@ -73,7 +73,7 @@ class Ivoinov_Wfl_Model_Export_Order extends Ivoinov_Wfl_Model_Export
     protected function _getOrderCollectionForExport()
     {
         return Mage::getResourceModel('sales/order_collection')
-            ->addFieldToFilter('processing', 'status')
+            ->addFieldToFilter('status', 'processing')
             ->addFieldToFilter(Ivoinov_Wfl_Helper_Data::ORDER_ATTRIBUTE_CODE_IS_SEND_TO_WFL,
                 array(array('eq' => 0), array('null' => true)));
     }
@@ -180,7 +180,7 @@ class Ivoinov_Wfl_Model_Export_Order extends Ivoinov_Wfl_Model_Export
     protected function _downloadFileToFTP(DOMDocument $document, Mage_Sales_Model_Order $order)
     {
         $filename = sprintf('order_%s_%s.xml', $order->getIncrementId(),
-            date('Ymd_Hi', strtotime($order->getCreatedAtStoreDate())));
+            date('dmY', strtotime($order->getCreatedAtStoreDate())));
         $filepath = implode(DS, array(Mage::getBaseDir('var'), 'export', 'orders'));
         if (!file_exists($filepath) || !is_writable($filepath)) {
             mkdir($filepath, 07777, true);
