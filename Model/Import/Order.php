@@ -163,7 +163,7 @@ class Ivoinov_Wfl_Model_Import_Order extends Ivoinov_Wfl_Model_Import
         if (isset($track)) {
             $track->save();
         }
-        $shipment->sendEmail(true);
+        $shipment->sendEmail(true, 'Your order has been shipped');
     }
 
     /**
@@ -298,7 +298,7 @@ class Ivoinov_Wfl_Model_Import_Order extends Ivoinov_Wfl_Model_Import
     {
         $shippingAddress = $order->getShippingAddress();
         if ($shippingAddress->getCountryId() == 'au') {
-            return 'Aus Post';
+            return 'AUS Post';
         }
         if ($shippingAddress->getCountryId() == 'nz') {
             return 'DHL Ecommerce';
