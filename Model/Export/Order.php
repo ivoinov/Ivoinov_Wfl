@@ -222,6 +222,7 @@ class Ivoinov_Wfl_Model_Export_Order extends Ivoinov_Wfl_Model_Export
             Mage::getModel('core/date')->gmtDate('Y-m-d H:i:s'));
         $order->setData(Ivoinov_Wfl_Helper_Data::ORDER_WFL_FILE_CONTENT, $orderXml->saveXML());
         $order->setStatus(Ivoinov_Wfl_Helper_Statuses::WAREHOUSE_PROCESSING);
+        $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING);
         $order->save();
 
     }

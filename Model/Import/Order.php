@@ -23,10 +23,10 @@
  */
 class Ivoinov_Wfl_Model_Import_Order extends Ivoinov_Wfl_Model_Import
 {
-    CONST PATH_TO_ORDER_FILES                    = 'import/orders';
-    CONST PATH_TO_FILES_ON_FTP                   = '/Status_Update/New';
-    CONST ORDER_FILES_MASK                       = 'OSL_*.xml';
-    CONST TRACK_CARRIER_CODE                     = 'custom';
+    CONST PATH_TO_ORDER_FILES  = 'import/orders';
+    CONST PATH_TO_FILES_ON_FTP = '/Status_Update/New';
+    CONST ORDER_FILES_MASK     = 'OSL_*.xml';
+    CONST TRACK_CARRIER_CODE   = 'custom';
 
     protected $_ordersXPATH = 'ConfirmationBody/Orders';
     protected $_orderIncrementIdXPATH = 'Order/OrderNumber';
@@ -76,7 +76,8 @@ class Ivoinov_Wfl_Model_Import_Order extends Ivoinov_Wfl_Model_Import
                         }
                         $this->_updateOrderStatus($orderModel, (string)$statuses[0]);
                         if ((string)$statuses[0] == Ivoinov_Wfl_Helper_Statuses::DELIVERY_ORDER_STATUS_PICKED_PARTIALLY
-                            || (string)$statuses[0] == Ivoinov_Wfl_Helper_Statuses::DELIVERY_ORDER_STATUS_PICKED_UP_FULL) {
+                            || (string)$statuses[0]
+                            == Ivoinov_Wfl_Helper_Statuses::DELIVERY_ORDER_STATUS_PICKED_UP_FULL) {
                             $this->_createShipping($orderModel, $order);
                             $this->_moveFileToArchive($file);
                         } else {
@@ -242,6 +243,11 @@ class Ivoinov_Wfl_Model_Import_Order extends Ivoinov_Wfl_Model_Import
     protected function _updateOrderStatus(Mage_Sales_Model_Order $order, $warehouseStatus)
     {
         $orderStatus = Ivoinov_Wfl_Helper_Statuses::getMagentoOrderStatusByWarehouseStatus($warehouseStatus);
+        if ($orderStatus == Mage_Sales_Model_Order::STATE_COMPLETE) {
+            $order->setData('state', Mage_Sales_Model_Order::STATE_COMPLETE);
+        } else {
+            $order->setData('state', Mage_Sales_Model_Order::STATE_PROCESSING);
+        }
         $order->setStatus($orderStatus);
         $order->save();
     }
