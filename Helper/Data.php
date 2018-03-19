@@ -22,6 +22,9 @@
 class Ivoinov_Wfl_Helper_Data extends Mage_Core_Helper_Abstract
 {
     CONST ORDER_ATTRIBUTE_CODE_IS_SEND_TO_WFL = 'is_send_to_wfl';
+    CONST ORDER_ATTRIBUTE_IS_SEND_TO_WFL_DATE = 'send_to_wfl_at';
+    CONST ORDER_WFL_FILE_CONTENT              = 'wfl_file_content';
+
     CONST DELIVERY_TAX_PERCENT                = 10;
 
     public function getDeliveryTaxPercent()

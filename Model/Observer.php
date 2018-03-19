@@ -40,4 +40,36 @@ class Ivoinov_Wfl_Model_Observer
         $importModel = Mage::getModel('ivoinov_wfl/import_order');
         $importModel->import();
     }
+
+    /**
+     * Add additional columns to order grid.
+     *
+     * @param Varien_Event_Observer $observer
+     *
+     * @throws Exception
+     */
+    public function adminhtmlAddColumnsToOrderGrid(Varien_Event_Observer $observer)
+    {
+        $block = $observer->getEvent()->getBlock();
+        if ($block instanceof Mage_Adminhtml_Block_Sales_Order_Grid) {
+            /** @var Mage_Adminhtml_Block_Sales_Order_Grid $block */
+            $block->addColumn(Ivoinov_Wfl_Helper_Data::ORDER_ATTRIBUTE_CODE_IS_SEND_TO_WFL, array(
+                'header'  => Mage::helper('sales')->__('Is sent to warehouse'),
+                'index'   => Ivoinov_Wfl_Helper_Data::ORDER_ATTRIBUTE_CODE_IS_SEND_TO_WFL,
+                'type'    => 'options',
+                'options' => Mage::getModel('adminhtml/system_config_source_yesno')->toArray(),
+                'width'   => '70px',
+            ));
+            $block->addColumnsOrder(Ivoinov_Wfl_Helper_Data::ORDER_ATTRIBUTE_CODE_IS_SEND_TO_WFL, 'grand_total');
+
+            $block->addColumn(Ivoinov_Wfl_Helper_Data::ORDER_ATTRIBUTE_IS_SEND_TO_WFL_DATE, array(
+                'header' => Mage::helper('sales')->__('Sent to warehouse at'),
+                'index'  => Ivoinov_Wfl_Helper_Data::ORDER_ATTRIBUTE_IS_SEND_TO_WFL_DATE,
+                'type'   => 'datetime',
+            ));
+            $block->addColumnsOrder(Ivoinov_Wfl_Helper_Data::ORDER_ATTRIBUTE_IS_SEND_TO_WFL_DATE,
+                Ivoinov_Wfl_Helper_Data::ORDER_ATTRIBUTE_CODE_IS_SEND_TO_WFL);
+            $block->sortColumnsByOrder();
+        }
+    }
 }

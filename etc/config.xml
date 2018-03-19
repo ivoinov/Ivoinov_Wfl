@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Ivoinov_Wfl>
-            <version>0.1.0</version>
+            <version>0.1.1</version>
         </Ivoinov_Wfl>
     </modules>
     <global>
@@ -29,6 +29,19 @@
             </ivoinov_wfl_setup>
         </resources>
     </global>
+    <adminhtml>
+        <events>
+            <core_block_abstract_to_html_before>
+                <observers>
+                    <ivoinov_wfl>
+                        <type>model</type>
+                        <class>ivoinov_wfl/observer</class>
+                        <method>adminhtmlAddColumnsToOrderGrid</method>
+                    </ivoinov_wfl>
+                </observers>
+            </core_block_abstract_to_html_before>
+        </events>
+    </adminhtml>
     <crontab>
         <jobs>
             <wfl_order_export>
