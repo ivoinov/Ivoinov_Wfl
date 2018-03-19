@@ -27,8 +27,6 @@ class Ivoinov_Wfl_Model_Import_Order extends Ivoinov_Wfl_Model_Import
     CONST PATH_TO_FILES_ON_FTP                   = '/Status_Update/New';
     CONST ORDER_FILES_MASK                       = 'OSL_*.xml';
     CONST TRACK_CARRIER_CODE                     = 'custom';
-    CONST DELIVERY_ORDER_STATUS_PICKED_UP_FULL   = '1302';
-    CONST DELIVERY_ORDER_STATUS_PICKED_PARTIALLY = '1301';
 
     protected $_ordersXPATH = 'ConfirmationBody/Orders';
     protected $_orderIncrementIdXPATH = 'Order/OrderNumber';
@@ -76,10 +74,10 @@ class Ivoinov_Wfl_Model_Import_Order extends Ivoinov_Wfl_Model_Import
                             $this->_moveFileToArchive($file);
                             continue;
                         }
-                        if ((string)$statuses[0] == self::DELIVERY_ORDER_STATUS_PICKED_PARTIALLY
-                            || (string)$statuses[0] == self::DELIVERY_ORDER_STATUS_PICKED_UP_FULL) {
+                        $this->_updateOrderStatus($orderModel, (string)$statuses[0]);
+                        if ((string)$statuses[0] == Ivoinov_Wfl_Helper_Statuses::DELIVERY_ORDER_STATUS_PICKED_PARTIALLY
+                            || (string)$statuses[0] == Ivoinov_Wfl_Helper_Statuses::DELIVERY_ORDER_STATUS_PICKED_UP_FULL) {
                             $this->_createShipping($orderModel, $order);
-                            $this->_setOrderToComplete($orderModel);
                             $this->_moveFileToArchive($file);
                         } else {
                             // Continue as status node is missing
@@ -237,13 +235,14 @@ class Ivoinov_Wfl_Model_Import_Order extends Ivoinov_Wfl_Model_Import
 
     /**
      * @param Mage_Sales_Model_Order $order
+     * @param                        $warehouseStatus
      *
      * @throws Exception
      */
-    protected function _setOrderToComplete(Mage_Sales_Model_Order $order)
+    protected function _updateOrderStatus(Mage_Sales_Model_Order $order, $warehouseStatus)
     {
-        $order->setData('state', Mage_Sales_Model_Order::STATE_COMPLETE);
-        $order->setData('status', Mage_Sales_Model_Order::STATE_COMPLETE);
+        $orderStatus = Ivoinov_Wfl_Helper_Statuses::getMagentoOrderStatusByWarehouseStatus($warehouseStatus);
+        $order->setStatus($orderStatus);
         $order->save();
     }
 

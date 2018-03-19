@@ -58,11 +58,7 @@ class Ivoinov_Wfl_Model_Export_Order extends Ivoinov_Wfl_Model_Export
                 $ordersNode->appendChild($orderXml->createElement('Status', 'CREATED'));
                 $orderXml->formatOutput = true;
                 $this->_downloadFileToFTP($orderXml, $order);
-                $order->setData(Ivoinov_Wfl_Helper_Data::ORDER_ATTRIBUTE_CODE_IS_SEND_TO_WFL, 1);
-                $order->setData(Ivoinov_Wfl_Helper_Data::ORDER_ATTRIBUTE_IS_SEND_TO_WFL_DATE,
-                    Mage::getModel('core/date')->gmtDate('Y-m-d H:i:s'));
-                $order->setData(Ivoinov_Wfl_Helper_Data::ORDER_WFL_FILE_CONTENT, $orderXml->saveXML());
-                $order->save();
+                $this->_updateOrderData($order, $orderXml);
             } catch (Exception $e) {
                 Mage::logException($e);
                 continue;
@@ -211,5 +207,22 @@ class Ivoinov_Wfl_Model_Export_Order extends Ivoinov_Wfl_Model_Export
         ));
         mkdir(dirname($newFilePath), 0777, true);
         rename($filePath, $newFilePath);
+    }
+
+    /**
+     * @param Mage_Sales_Model_Order $order
+     * @param                        $orderXml
+     *
+     * @throws Exception
+     */
+    protected function _updateOrderData(Mage_Sales_Model_Order $order, DOMDocument $orderXml)
+    {
+        $order->setData(Ivoinov_Wfl_Helper_Data::ORDER_ATTRIBUTE_CODE_IS_SEND_TO_WFL, 1);
+        $order->setData(Ivoinov_Wfl_Helper_Data::ORDER_ATTRIBUTE_IS_SEND_TO_WFL_DATE,
+            Mage::getModel('core/date')->gmtDate('Y-m-d H:i:s'));
+        $order->setData(Ivoinov_Wfl_Helper_Data::ORDER_WFL_FILE_CONTENT, $orderXml->saveXML());
+        $order->setStatus(Ivoinov_Wfl_Helper_Statuses::WAREHOUSE_PROCESSING);
+        $order->save();
+
     }
 }
