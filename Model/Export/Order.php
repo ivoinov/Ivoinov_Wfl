@@ -59,6 +59,9 @@ class Ivoinov_Wfl_Model_Export_Order extends Ivoinov_Wfl_Model_Export
                 $orderXml->formatOutput = true;
                 $this->_downloadFileToFTP($orderXml, $order);
                 $order->setData(Ivoinov_Wfl_Helper_Data::ORDER_ATTRIBUTE_CODE_IS_SEND_TO_WFL, 1);
+                $order->setData(Ivoinov_Wfl_Helper_Data::ORDER_ATTRIBUTE_IS_SEND_TO_WFL_DATE,
+                    Mage::getModel('core/date')->gmtDate('Y-m-d H:i:s'));
+                $order->setData(Ivoinov_Wfl_Helper_Data::ORDER_WFL_FILE_CONTENT, $orderXml->saveXML());
                 $order->save();
             } catch (Exception $e) {
                 Mage::logException($e);
