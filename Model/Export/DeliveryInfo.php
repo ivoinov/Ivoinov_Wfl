@@ -82,6 +82,8 @@ class Ivoinov_Wfl_Model_Export_DeliveryInfo extends Ivoinov_Wfl_Model_Export_Abs
         } elseif ($this->_order->getShippingAddress()->getCountryId() == 'nz'
             || $this->_order->getShippingAddress()->getCountryId() == 'au') {
             return 'APSSTD';
+        } elseif ($this->_order->getShippingMethod(true)->getMethod() == 'shipping_express') {
+            return 'APSEXP';
         } else {
             return 'DHLGML';
         }
