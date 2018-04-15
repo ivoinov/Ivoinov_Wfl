@@ -74,6 +74,7 @@ class Ivoinov_Wfl_Model_Export_Order extends Ivoinov_Wfl_Model_Export
         return Mage::getResourceModel('sales/order_collection')->addFieldToFilter('status', array(
             array('eq' => 'processing'),
             array('eq' => 'fraud'),
+            array('eq' => 'pending'),
         ))->addFieldToFilter(Ivoinov_Wfl_Helper_Data::ORDER_ATTRIBUTE_CODE_IS_SEND_TO_WFL,
             array(array('eq' => 0), array('null' => true)));
     }

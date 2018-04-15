@@ -14,6 +14,11 @@
             <ivoinov_wfl_resource>
                 <class>Ivoinov_Wfl_Model_Resource</class>
             </ivoinov_wfl_resource>
+            <sales>
+                <rewrite>
+                    <quote_address>Ivoinov_Wfl_Model_Sales_Quote_Address</quote_address>
+                </rewrite>
+            </sales>
         </models>
         <helpers>
             <ivoinov_wfl>
