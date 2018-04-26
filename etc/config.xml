@@ -33,6 +33,13 @@
                 </setup>
             </ivoinov_wfl_setup>
         </resources>
+        <blocks>
+            <adminhtml>
+                <rewrite>
+                    <sales_order_grid>Ivoinov_Wfl_Block_Adminhtml_Sales_Order_Grid</sales_order_grid>
+                </rewrite>
+            </adminhtml>
+        </blocks>
     </global>
     <adminhtml>
         <events>
@@ -68,4 +75,15 @@
             </wfl_order_import>
         </jobs>
     </crontab>
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <Ivoinov_Wfl after="Mage_Adminhtml">Ivoinov_Wfl_Adminhtml</Ivoinov_Wfl>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
 </config>

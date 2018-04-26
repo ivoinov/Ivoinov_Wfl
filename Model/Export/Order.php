@@ -23,46 +23,49 @@ class Ivoinov_Wfl_Model_Export_Order extends Ivoinov_Wfl_Model_Export
 {
     CONST PATH_TO_FILE_ON_FTP = 'New_Orders/New/';
 
-    /**
-     * {@inheritdoc}
-     */
+    public function exportOrder(Mage_Sales_Model_Order $order)
+    {
+        try {
+            $orderXml = new DOMDocument('1.0', 'UTF-8');
+            $ordersNode = $orderXml->appendChild($orderXml->createElement('Orders'));
+            $orderNode = $ordersNode->appendChild($orderXml->createElement('Order'));
+            $header = $orderNode->appendChild($orderXml->createElement('header'));
+            $header->appendChild($orderXml->createElement('IsBackOrder', 'N'));
+            $header->appendChild($orderXml->createElement('invoiceid', $order->getIncrementId()));
+            $header->appendChild($orderXml->createElement('orderno', $order->getIncrementId()));
+            $this->_addShippingInfo($header, $orderXml, $order);
+            $this->_addBillingInfo($header, $orderXml, $order);
+            $this->_addDeliveryInfo($header, $orderXml, $order);
+
+            $products = $orderNode->appendChild($orderXml->createElement('products'));
+            /** @var Mage_Sales_Model_Order_Item $orderItem */
+            foreach ($order->getAllVisibleItems() as $orderItem) {
+                if ($orderItem->getProduct()->isConfigurable()) {
+                    foreach ($orderItem->getChildrenItems() as $childOrderItem) {
+                        $this->_addProductInfo($products, $orderXml, $order, $childOrderItem);
+                    }
+                } else {
+                    $this->_addProductInfo($products, $orderXml, $order, $orderItem);
+                }
+            }
+            $this->_addPaymentInfo($ordersNode, $orderXml, $order);
+            $ordersNode->appendChild($orderXml->createElement('promotions'));
+            $ordersNode->appendChild($orderXml->createElement('Status', 'CREATED'));
+            $orderXml->formatOutput = true;
+            $this->_downloadFileToFTP($orderXml, $order);
+            $this->_updateOrderData($order, $orderXml);
+        } catch (Exception $e) {
+            Mage::logException($e);
+
+            return;
+        }
+    }
+
     public function export()
     {
         /** @var Mage_Sales_Model_Order $order */
         foreach ($this->_getOrderCollectionForExport() as $order) {
-            try {
-                $orderXml = new DOMDocument('1.0', 'UTF-8');
-                $ordersNode = $orderXml->appendChild($orderXml->createElement('Orders'));
-                $orderNode = $ordersNode->appendChild($orderXml->createElement('Order'));
-                $header = $orderNode->appendChild($orderXml->createElement('header'));
-                $header->appendChild($orderXml->createElement('IsBackOrder', 'N'));
-                $header->appendChild($orderXml->createElement('invoiceid', $order->getIncrementId()));
-                $header->appendChild($orderXml->createElement('orderno', $order->getIncrementId()));
-                $this->_addShippingInfo($header, $orderXml, $order);
-                $this->_addBillingInfo($header, $orderXml, $order);
-                $this->_addDeliveryInfo($header, $orderXml, $order);
-
-                $products = $orderNode->appendChild($orderXml->createElement('products'));
-                /** @var Mage_Sales_Model_Order_Item $orderItem */
-                foreach ($order->getAllVisibleItems() as $orderItem) {
-                    if ($orderItem->getProduct()->isConfigurable()) {
-                        foreach ($orderItem->getChildrenItems() as $childOrderItem) {
-                            $this->_addProductInfo($products, $orderXml, $order, $childOrderItem);
-                        }
-                    } else {
-                        $this->_addProductInfo($products, $orderXml, $order, $orderItem);
-                    }
-                }
-                $this->_addPaymentInfo($ordersNode, $orderXml, $order);
-                $ordersNode->appendChild($orderXml->createElement('promotions'));
-                $ordersNode->appendChild($orderXml->createElement('Status', 'CREATED'));
-                $orderXml->formatOutput = true;
-                $this->_downloadFileToFTP($orderXml, $order);
-                $this->_updateOrderData($order, $orderXml);
-            } catch (Exception $e) {
-                Mage::logException($e);
-                continue;
-            }
+            $this->exportOrder($order);
         }
     }
 
